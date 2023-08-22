@@ -1,0 +1,7 @@
+.button {
+    -fx-font-family:       "Lato Light";
+    -fx-font-size:         18;
+    -fx-min-width:         90;
+    -fx-min-height:        90;
+    -fx-background-radius: 45;
+}

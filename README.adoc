@@ -1,0 +1,114 @@
+= ws2C - DJI Tello mit Java
+
+Für die Mini-Drohne Tello Edu von Ryze gibt es Libraries für mehrere Programmiersprachen. Die umfassendsten Libraries sind für Swift, Python und Scratch.
+
+Die existierenden Libraries für Java sind demgegenüber sehr rudimentär. Das ist für den ws2C die ideale Ausgangssituation.
+
+Es soll in diesem Projekt nicht nur eine bestehende Library angewendet werden, sondern gleichzeitig
+
+* ein Java-API zur Tello-Steuerung und eine
+* JavaFX-Applikation, die dieses API verwendet,
+
+entworfen und entwickelt werden.
+
+
+== Team
+
+* _hier die Namen der Teammitglieder eintragen_
+
+
+== Voraussetzungen
+
+* https://adoptium.net/en-GB/temurin/releases?version=17[Java 17]. Hinweis für Mac-Benutzer: Die Verwendung von https://sdkman.io[SDKMAN] (s.u.) für die Installation und die Verwaltung von JDKs ist sehr empfehlenswert.
+
+* https://www.jetbrains.com/idea/download/[IntelliJ IDEA 2023.2]. Es ist wichtig, diese neueste Version zu verwenden. Am besten via https://www.jetbrains.com/toolbox-app/[JetBrains Toolbox] installieren. Empfehlenswert ist die Verwendung der Ultimate Edition. Studierende erhalten, nach Anmeldung, eine kostenlose Lizenz. Registrieren Sie sich unter https://www.jetbrains.com/student/[https://www.jetbrains.com/student/] mit Ihrer FHNW E-Mail-Adresse. Für die Community-Edition benötigt man keine Lizenz.
+
+* *TelloCamp*. Ein in einem IP5-Projekt entstandener Emulator für die Tello Drohne, den wir während der Entwicklung einsetzen werden. Downloaden Sie die für Ihren Laptop passende Version aus MS Teams oder direkt von https://gitlab.fhnw.ch/iit-projektschiene/hs21/ip5-tello-drone/-/tree/main/tellocamp_builds[hier].
+
+* https://git-scm.com/downloads[Git]. Als Sourcecode-Repository verwenden wir `git`.
+
+* https://github.com[GitHub-Account]. Wir werden mit GitHub Classroom arbeiten. Dafür benötigen Sie einen GitHub Account.
+
+
+
+== Empfehlung zur Installation des JDK für MAC (und LINUX)
+
+Für Mac und Linux gibt es ein sehr empfehlenswertes Tool zur Verwaltung unterschiedlicher Software Development Kits: https://sdkman.io[SDKMAN]
+
+Insbesondere wenn, wie üblich, mehrere Java JDKs verwendet werden sollen, hilft SDKMAN.
+
+Sie können natürlich auch weiterhin die "normalen" Installationsmöglichkeiten verwenden.
+
+=== Installation von SDKMAN:
+Folgenden Befehl in einem Terminal eingeben:
+```shell
+export SDKMAN_DIR="$HOME/sdkman" && curl -s "https://get.sdkman.io" | bash
+```
+
+Falls Sie SDKMAN bereits früher installiert haben, müssen Sie SDKMAN auf den neuesten Stand bringen:
+
+```shell
+sdk update
+```
+
+=== Installation von JDK 17
+In einem neuen Terminal-Window diesen Befehl eingeben:
+
+```shell
+sdk install java 17.0.8-tem
+```
+
+Danach liegt der JDK in ihrer Home-Directory im Folder `sdkman/candidates/java`. Von dort können Sie es dann in IntelliJ als neuen SDK anlegen und im Projekt verwenden.
+
+Mit:
+
+```shell
+sdk ls java
+```
+
+können Sie sich auflisten lassen welche anderen JDKs zu Installation zur Verfügung stehen.
+
+
+== Dokumentation
+
+Im `docs`-Folder ist die Original-Dokumentation zur Tello-Drohne enthalten.
+
+Sehr empfehlenswert ist `TelloCamp Instructions.pdf`. Darin enthalten ist eine überarbeitete Dokumentation der von `TelloCamp` derzeit umgesetzten Kommandos.
+
+
+== Erste Schritte
+
+Als Starter-Code ist in diesem Projekt eine erste, rudimentäre API zur Steuerung einer Tello-Drohne (vor allem die Klasse `Tello`) und zwei kleine Apps enthalten
+
+* `TelloFlightPlan`. Lässt die Drohne einen fixen Flugplan ausführen (ohne GUI).
+* `TelloAppStarter`. Eine JavaFX-Applikation zur Steuerung der Drohne. Der Aufbau dieser Applikation entspricht genau dem Unterrichtsstoff aus OOP2.
+
+Starten Sie zunächst den `TelloCamp` Emulator, anschliessend eine der beiden Apps.
+
+Hinweis: Der Starter-Code ist in keiner Weise vollständig. Das ist auch so gewollt. Schliesslich  besteht die Aufgabe für Sie ja darin, eine brauchbare, stabile Steuerungs-Applikation für die Drohne zu entwickeln.
+
+
+== Video
+
+Im Package `telloflix` ist der Starter-Code ergänzt um die Verarbeitung des Video-Streams der Drohne.
+
+Hier wird noch offensichtlicher, dass der Starter-Code noch keine brauchbare Applikation darstellt: Es werden stets nur die Videobilder nach der vollständigen Abarbeitung eines Kommandos angezeigt. Der Grund: Während der Abarbeitung eines Kommandos ist das UI blockiert und die zwischenzeitlich gelieferten Bilder können nicht angezeigt werden. Lösung: Die Kommandos müssen asynchron abgesetzt werden.
+
+== Installer
+Es kann ein Installer und damit eine doppel-klickbare Applikation für Mac und Windows erzeugt werden.
+
+Dafür im `pom.xml` die zu startende Applikation in der Property `<main-class>` eintragen.
+
+Auf einem Mac:
+```shell
+mvn clean javafx:jlink jpackage:jpackage@mac
+```
+
+Auf einer Windows-Maschine:
+```shell
+mvn clean javafx:jlink jpackage:jpackage@win
+```
+
+
+
+
