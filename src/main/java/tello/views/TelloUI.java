@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 
+import javafx.scene.text.Text;
 import tello.models.Tello;
 import tello.views.util.ViewMixin;
 
@@ -16,6 +17,7 @@ public class TelloUI extends GridPane implements ViewMixin {
     private Button landButton;
     private Button flyUpButton;
     private Button emergencyButton;
+    private Text batteryLevel;
 
     /**
      * Jeder UI-Teil benoetigt die darzustellenden Informationen.
@@ -36,10 +38,11 @@ public class TelloUI extends GridPane implements ViewMixin {
 
     @Override
     public void initializeParts() {
-        startButton     = new Button("Takeoff");
-        landButton      = new Button("Land");
-        flyUpButton     = new Button("Up");
+        startButton = new Button("Takeoff");
+        landButton = new Button("Land");
+        flyUpButton = new Button("Up");
         emergencyButton = new Button("Panic !");
+        batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
     }
 
     @Override
@@ -47,17 +50,18 @@ public class TelloUI extends GridPane implements ViewMixin {
         setHgap(20);
         setVgap(20);
         setPadding(new Insets(50));
-        add(startButton    , 0, 0);
-        add(flyUpButton    , 0, 1);
-        add(landButton     , 0, 2);
+        add(startButton, 0, 0);
+        add(flyUpButton, 0, 1);
+        add(landButton, 0, 2);
         add(emergencyButton, 0, 3);
+        add(batteryLevel, 0, 4);
     }
 
     @Override
     public void setupEventHandlers() {
-        startButton.setOnAction(event     -> tello.takeOff());  // das blockiert das UI. Kann das so bleiben?
-        landButton.setOnAction(event      -> tello.land());
-        flyUpButton.setOnAction(event     -> tello.up(50));
+        startButton.setOnAction(event -> tello.takeOff());  // das blockiert das UI. Kann das so bleiben?
+        landButton.setOnAction(event -> tello.land());
+        flyUpButton.setOnAction(event -> tello.up(50));
 
         emergencyButton.setOnAction(event -> tello.emergency());
     }
