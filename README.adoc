@@ -14,7 +14,7 @@ entworfen und entwickelt werden.
 
 == Team
 
-* _Tugce Nur Tas | Tamira Leber | Nicolas Ostwald | Laurin Scheuber_
+* _Laurin Scheuber | _
 
 
 == Voraussetzungen
