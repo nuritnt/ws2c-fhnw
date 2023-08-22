@@ -18,6 +18,9 @@ public class TelloUI extends GridPane implements ViewMixin {
     private Button flyUpButton;
     private Button emergencyButton;
     private Text batteryLevel;
+    private Button yawLeft;
+    private Button yawRight;
+
 
     /**
      * Jeder UI-Teil benoetigt die darzustellenden Informationen.
@@ -43,6 +46,8 @@ public class TelloUI extends GridPane implements ViewMixin {
         flyUpButton = new Button("Up");
         emergencyButton = new Button("Panic !");
         batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
+        yawLeft = new Button("Yaw Left");
+        yawRight = new Button("Yaw Right");
     }
 
     @Override
@@ -55,6 +60,8 @@ public class TelloUI extends GridPane implements ViewMixin {
         add(landButton, 0, 2);
         add(emergencyButton, 0, 3);
         add(batteryLevel, 0, 4);
+        add(yawLeft, 0,5);
+        add(yawRight,0,6);
     }
 
     @Override
@@ -62,6 +69,8 @@ public class TelloUI extends GridPane implements ViewMixin {
         startButton.setOnAction(event -> tello.takeOff());  // das blockiert das UI. Kann das so bleiben?
         landButton.setOnAction(event -> tello.land());
         flyUpButton.setOnAction(event -> tello.up(50));
+       // yawLeft.setOnAction(event -> tello.ccw(45));
+      //  yawRight.setOnAction(evebt -> tello.cw(45));
 
         emergencyButton.setOnAction(event -> tello.emergency());
     }

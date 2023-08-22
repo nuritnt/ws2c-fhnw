@@ -178,6 +178,12 @@ public class Tello {
     }
 
     // todo: Hier fehlen noch viele notwendige Methoden zur Drohnen-Steuerung, z.B. 'down', 'left', 'right'
+
+    // implement ccw / cw like that
+  /*  public boolean up(int z) {
+        return sendCommandAndWait("up " + z);
+    }*/
+
     // besonders wichtig: 'rc'
     // oder: Verarbeitung des Video-Signals
 
