@@ -14,7 +14,7 @@ entworfen und entwickelt werden.
 
 == Team
 
-* _Laurin Scheuber | Tugce Nur Tas | _
+* _Laurin Scheuber | Tugce Nur Tas| _
 
 
 == Voraussetzungen
