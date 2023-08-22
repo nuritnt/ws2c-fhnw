@@ -18,8 +18,15 @@ public class TelloUI extends GridPane implements ViewMixin {
     private Button flyUpButton;
     private Button emergencyButton;
     private Text batteryLevel;
-    private Button yawLeft;
-    private Button yawRight;
+    private Button yawLeftButton;
+    private Button yawRightButton;
+
+    private Button flyDownButton;
+    private Button flyForwardButton;
+    private Button flyBackwardButton;
+    private Button flyLeftButton;
+    private Button flyRightButton;
+
 
 
     /**
@@ -46,8 +53,14 @@ public class TelloUI extends GridPane implements ViewMixin {
         flyUpButton = new Button("Up");
         emergencyButton = new Button("Panic !");
         batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
-        yawLeft = new Button("Yaw Left");
-        yawRight = new Button("Yaw Right");
+        yawLeftButton = new Button("Yaw Left");
+        yawRightButton = new Button("Yaw Right");
+        flyDownButton = new Button("Down");
+        flyForwardButton = new Button("Forward");
+        flyBackwardButton = new Button("Backward");
+        flyLeftButton = new Button("Left");
+        flyRightButton = new Button("Right");
+
     }
 
     @Override
@@ -60,8 +73,14 @@ public class TelloUI extends GridPane implements ViewMixin {
         add(landButton, 0, 2);
         add(emergencyButton, 0, 3);
         add(batteryLevel, 0, 4);
-        add(yawLeft, 0,5);
-        add(yawRight,0,6);
+        add(yawLeftButton, 1,0);
+        add(yawRightButton,1,1);
+        add(flyDownButton,1,2);
+        add(flyForwardButton,1,3);
+        add(flyBackwardButton,1,4);
+        add(flyLeftButton,1,5);
+        add(flyRightButton,1,6);
+
     }
 
     @Override
@@ -69,8 +88,13 @@ public class TelloUI extends GridPane implements ViewMixin {
         startButton.setOnAction(event -> tello.takeOff());  // das blockiert das UI. Kann das so bleiben?
         landButton.setOnAction(event -> tello.land());
         flyUpButton.setOnAction(event -> tello.up(50));
-       // yawLeft.setOnAction(event -> tello.ccw(45));
-      //  yawRight.setOnAction(evebt -> tello.cw(45));
+        yawLeftButton.setOnAction(event -> tello.ccw(45));
+        yawRightButton.setOnAction(event -> tello.cw(45));
+        flyDownButton.setOnAction(event -> tello.down(50));
+        flyForwardButton.setOnAction(event -> tello.forward(50));
+        flyBackwardButton.setOnAction(event -> tello.back(50));
+        flyLeftButton.setOnAction(event -> tello.left(50));
+        flyRightButton.setOnAction(event -> tello.right(50));
 
         emergencyButton.setOnAction(event -> tello.emergency());
     }
