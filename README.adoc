@@ -14,7 +14,7 @@ entworfen und entwickelt werden.
 
 == Team
 
-* _hier die Namen der Teammitglieder eintragen_
+* _Tugce Nur Tas | Tamira Leber | Nicolas Ostwald | Laurin Scheuber_
 
 
 == Voraussetzungen
