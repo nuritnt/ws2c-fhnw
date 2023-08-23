@@ -110,6 +110,11 @@ Auf einer Windows-Maschine:
 mvn clean javafx:jlink jpackage:jpackage@win
 ```
 
+== How to
+Um das TemplateMatching laufen zu lassen wird es über die Intelij Run Configurations ausgeführt und die nötigen
+Argumente bei "Program Arguments" eingefügt. Das erste Argument(Pfad) stellt die Source Datei dar, das zweite das Bild
+welches gesucht wird "imageToFind". Es braucht keine "" '' und muss auch nicht mit einem Komma getrennt werden.
+
 
 
 

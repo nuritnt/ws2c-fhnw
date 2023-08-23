@@ -1,7 +1,7 @@
 package tello;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacxpp.DoublePointer;
+import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.opencv.opencv_core.*;
 
 import java.util.ArrayList;
