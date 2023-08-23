@@ -181,7 +181,7 @@ public class Tello {
 
     // implement ccw / cw like that
     public boolean down(int z) {
-        return sendCommandAndWait("up " + z);
+        return sendCommandAndWait("down " + z);
     }
     public boolean ccw(int z) {
         return sendCommandAndWait("ccw " + z);
