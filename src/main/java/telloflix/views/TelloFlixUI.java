@@ -31,6 +31,10 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button flyBackwardButton;
     private Button flyLeftButton;
     private Button flyRightButton;
+    private Button flipLeftButton;
+    private Button flipRightButton;
+    private Button flipForwardButton;
+    private Button flipBackwardButton;
 
     private Canvas frameCanvas;
 
@@ -67,6 +71,10 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flyBackwardButton = new Button("Backward");
         flyLeftButton = new Button("Left");
         flyRightButton = new Button("Right");
+        flipLeftButton = new Button("Flip Left");
+        flipRightButton = new Button("Flip Right");
+        flipForwardButton = new Button("Flip Forward");
+        flipBackwardButton = new Button("Flip Backward");
 
         frameCanvas = new Canvas(TelloFlix.VIDEO_WIDTH, TelloFlix.VIDEO_HEIGHT);
     }
@@ -92,6 +100,11 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         add(flyBackwardButton,6,3,2,1);
         add(flyLeftButton,6,2);
         add(flyRightButton,7,2);
+
+        add(flipLeftButton, 0, 4);
+        add(flipRightButton, 1, 4);
+        add(flipForwardButton, 6, 4);
+        add(flipBackwardButton, 7, 4);
     }
 
     @Override
@@ -107,6 +120,10 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flyBackwardButton.setOnAction(event-> tello.back(50));
         flyLeftButton.setOnAction(event   -> tello.left(50));
         flyRightButton.setOnAction(event  -> tello.right(50));
+        flipLeftButton.setOnAction(event  -> tello.flip("l"));
+        flipRightButton.setOnAction(event -> tello.flip("r"));
+        flipForwardButton.setOnAction(event-> tello.flip("f"));
+        flipBackwardButton.setOnAction(event-> tello.flip("b"));
 
     }
 

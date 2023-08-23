@@ -240,6 +240,12 @@ public class TelloFlix {
         sendCommandAsync("back " + z);
     }
 
+    public void flip(String direction) {
+        sendCommandAsync("flip " + direction);
+    }
+
+
+
     // todo: Hier fehlen noch viele notwendige Methoden zur Drohnen-Steuerung, z.B. 'down', 'left', 'right'
     // besonders wichtig: 'rc'
     // oder: Verarbeitung des Video-Signals
