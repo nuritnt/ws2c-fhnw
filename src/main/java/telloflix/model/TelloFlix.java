@@ -40,7 +40,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
+    public static final String TELLO_IP_ADDRESS = "10.223.4.50";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -68,6 +68,7 @@ public class TelloFlix {
 
     private FFmpegFrameGrabber grabber;
     private FFmpegFrameRecorder recorder;
+    private boolean videoStreamOn = false;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -136,21 +137,24 @@ public class TelloFlix {
         new Thread(() -> {
             String videoAddress = "udp://" + LOCAL_IP_ADDRESS + ":" + VIDEO_PORT;
             grabber = new FFmpegFrameGrabber(videoAddress);
-            recorder = new FFmpegFrameRecorder("/tmp/recorded.mpeg", VIDEO_WIDTH, VIDEO_HEIGHT, 0);
-            recorder.setFormat("mpeg");
+            grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
+            grabber.setFormat("h264");
+            grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+            grabber.setImageWidth(VIDEO_WIDTH);
+            grabber.setImageHeight(VIDEO_HEIGHT);
+
+            recorder = new FFmpegFrameRecorder("recorded.mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+            recorder.setFormat("mp4");
             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 
-            // grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
-           // grabber.setFormat("h264");
-           // grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-           // grabber.setImageWidth(VIDEO_WIDTH);
-           // grabber.setImageHeight(VIDEO_HEIGHT);
             try {
                 grabber.start();
                 recorder.start();
             } catch (Exception e) {
                 LOGGER.severe("can't start FrameGrabber " + e.getMessage());
             }
+
+            videoStreamOn = true;
             Thread videoThread = new Thread(this::listenToVideo);
             videoThread.setDaemon(true);
             videoThread.start();
@@ -399,7 +403,7 @@ public class TelloFlix {
     }
 
     private void listenToVideo() {
-        while (connected) {
+        while (connected && videoStreamOn) {
             try {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
@@ -430,6 +434,7 @@ public class TelloFlix {
 
     public void record() {
         try {
+            videoStreamOn = false;
             recorder.stop();
             recorder.release();
 
