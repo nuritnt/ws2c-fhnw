@@ -9,6 +9,7 @@ import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import org.bytedeco.javacv.JavaFXFrameConverter;
 import telloflix.model.TelloFlix;
 import telloflix.views.utils.ViewMixin;
@@ -21,6 +22,15 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button landButton;
     private Button flyUpButton;
     private Button emergencyButton;
+    private Text batteryLevel;
+    private Button yawLeftButton;
+    private Button yawRightButton;
+
+    private Button flyDownButton;
+    private Button flyForwardButton;
+    private Button flyBackwardButton;
+    private Button flyLeftButton;
+    private Button flyRightButton;
 
     private Canvas frameCanvas;
 
@@ -49,6 +59,14 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         landButton      = new Button("Land");
         flyUpButton     = new Button("Up");
         emergencyButton = new Button("Panic !");
+        batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
+        yawLeftButton = new Button("Yaw Left");
+        yawRightButton = new Button("Yaw Right");
+        flyDownButton = new Button("Down");
+        flyForwardButton = new Button("Forward");
+        flyBackwardButton = new Button("Backward");
+        flyLeftButton = new Button("Left");
+        flyRightButton = new Button("Right");
 
         frameCanvas = new Canvas(TelloFlix.VIDEO_WIDTH, TelloFlix.VIDEO_HEIGHT);
     }
@@ -64,7 +82,16 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         add(landButton     , 0, 2);
         add(emergencyButton, 0, 3);
 
-        add(frameCanvas,     1, 0, 1, 4);
+        add(frameCanvas,     2, 1, 4, 4);
+
+        add(batteryLevel, 5, 0);
+        add(yawLeftButton, 0,2);
+        add(yawRightButton,1,2);
+        add(flyDownButton,0,3,2,1);
+        add(flyForwardButton,6,1,2,1);
+        add(flyBackwardButton,6,3,2,1);
+        add(flyLeftButton,6,2);
+        add(flyRightButton,7,2);
     }
 
     @Override
@@ -73,6 +100,14 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         landButton.setOnAction(event      -> tello.land());
         flyUpButton.setOnAction(event     -> tello.up(50));
         emergencyButton.setOnAction(event -> tello.emergency());
+        yawLeftButton.setOnAction(event   -> tello.ccw(45));
+        yawRightButton.setOnAction(event  -> tello.cw(45));
+        flyDownButton.setOnAction(event   -> tello.down(50));
+        flyForwardButton.setOnAction(event-> tello.forward(50));
+        flyBackwardButton.setOnAction(event-> tello.back(50));
+        flyLeftButton.setOnAction(event   -> tello.left(50));
+        flyRightButton.setOnAction(event  -> tello.right(50));
+
     }
 
     @Override

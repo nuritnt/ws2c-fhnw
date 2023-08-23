@@ -15,6 +15,8 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 
@@ -36,7 +38,7 @@ public class TelloFlix {
     private static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    private static final String TELLO_IP_ADDRESS = "10.175.50.176";
+    private static final String TELLO_IP_ADDRESS = "192.168.10.1";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -50,8 +52,8 @@ public class TelloFlix {
     private static final int STATE_PORT = 8890;
     private static final int VIDEO_PORT = 11111;
 
-    public static final int VIDEO_WIDTH  = 960;
-    public static final int VIDEO_HEIGHT = 720;
+    public static final int VIDEO_WIDTH  = 320;
+    public static final int VIDEO_HEIGHT = 240;
 
     private InetAddress    telloAddress = null;
     private DatagramSocket commandSocket;
@@ -63,6 +65,8 @@ public class TelloFlix {
     private final ObservableValue<Frame> currentFrame = new ObservableValue<>(null);
 
     private FFmpegFrameGrabber grabber;
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Verbindung zur Drohne (oder TelloCamp) aufbauen
@@ -155,10 +159,9 @@ public class TelloFlix {
     /**
      * Auto takeoff.
      *
-     * @return true if successful, otherwise false
      */
-    public boolean takeOff() {
-        return sendCommandAndWait("takeoff");
+    public void takeOff() {
+        sendCommandAsync("takeoff");
     }
 
     /**
@@ -215,6 +218,28 @@ public class TelloFlix {
         }
     }
 
+    public void down(int z) {
+        sendCommandAsync("down " + z);
+    }
+    public void ccw(int z) {
+        sendCommandAsync("ccw " + z);
+    }
+    public void cw(int z) {
+        sendCommandAsync("cw " + z);
+    }
+    public void left(int z) {
+        sendCommandAsync("left " + z);
+    }
+    public void right(int z) {
+        sendCommandAsync("right " + z);
+    }
+    public void forward(int z) {
+        sendCommandAsync("forward " + z);
+    }
+    public void back(int z) {
+        sendCommandAsync("back " + z);
+    }
+
     // todo: Hier fehlen noch viele notwendige Methoden zur Drohnen-Steuerung, z.B. 'down', 'left', 'right'
     // besonders wichtig: 'rc'
     // oder: Verarbeitung des Video-Signals
@@ -260,6 +285,10 @@ public class TelloFlix {
         final String response = getResponse().trim();
 
         return "ok".equals(response);
+    }
+
+    private void sendCommandAsync(final String command) {
+        executor.execute(() -> sendCommandAndWait(command));
     }
 
     /**
@@ -358,6 +387,7 @@ public class TelloFlix {
         while (connected) {
             try {
                 Frame frame = grabber.grabImage();
+                //hier frame verarbeiten
                 if (frame.image != null ) {
                     currentFrame.setValue(frame.clone());
                 }
