@@ -31,7 +31,7 @@ public class Tello {
     private static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    private static final String TELLO_IP_ADDRESS = "10.207.17.231";
+    private static final String TELLO_IP_ADDRESS = "10.207.14.123";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
