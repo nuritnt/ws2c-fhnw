@@ -118,3 +118,4 @@ welches gesucht wird "imageToFind". Es braucht keine "" '' und muss auch nicht m
 
 
 
+

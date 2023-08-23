@@ -2,12 +2,14 @@ package tello;
 
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.DoublePointer;
+import org.bytedeco.javacv.CanvasFrame;
 import org.bytedeco.opencv.opencv_core.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.bytedeco.javacv.Java2DFrameUtils.toBufferedImage;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_highgui.*;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
@@ -51,11 +53,27 @@ public class TemplateMatching {
         minMaxLoc(result, minVal, maxVal, min, max, null);
         rectangle(sourceColor,new Rect(max.x(),max.y(),template.cols(),template.rows()), randColor(), 2, 0, 0);
 
-        imshow("Original marked", sourceColor);
-        imshow("Ttemplate", template);
-        imshow("Results matrix", result);
-        waitKey(0);
-        destroyAllWindows();
+        // Display the "Original marked" image using CanvasFrame
+        CanvasFrame sourceFrame = new CanvasFrame("Original marked");
+        sourceFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        sourceFrame.showImage(toBufferedImage(sourceColor));
+
+        // Display the "Template" image using CanvasFrame
+        CanvasFrame templateFrame = new CanvasFrame("Template");
+        templateFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        templateFrame.showImage(toBufferedImage(template));
+
+        // Display the "Results matrix" image using CanvasFrame
+        CanvasFrame resultFrame = new CanvasFrame("Results matrix");
+        resultFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+        resultFrame.showImage(toBufferedImage(result));
+
+        // Wait for user interaction
+        try {
+            sourceFrame.waitKey(0);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
