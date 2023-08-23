@@ -1,10 +1,9 @@
 package telloflix.model;
 
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.*;
 import tello.models.util.ObservableValue;
+import telloflix.PacketRecorder;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -18,6 +17,9 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264;
+import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_MPEG1VIDEO;
 
 
 /**
@@ -35,10 +37,10 @@ public class TelloFlix {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     // das ist die IP-Adresse der "echten" Drohne (Hinweis: Ihr Laptop muss mit dem WLAN der Drohne verbunden sein)
-    private static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
+    public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    private static final String TELLO_IP_ADDRESS = "192.168.10.1";
+    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -50,12 +52,12 @@ public class TelloFlix {
     // die Ports über die Status-Meldungen und Video-Bilder ankommen
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
     private static final int STATE_PORT = 8890;
-    private static final int VIDEO_PORT = 11111;
+    public static final int VIDEO_PORT = 11111;
 
-    public static final int VIDEO_WIDTH  = 320;
-    public static final int VIDEO_HEIGHT = 240;
+    public static final int VIDEO_WIDTH  = 960;
+    public static final int VIDEO_HEIGHT = 720;
 
-    private InetAddress    telloAddress = null;
+    public InetAddress    telloAddress = null;
     private DatagramSocket commandSocket;
 
     private DatagramSocket statusSocket;
@@ -65,8 +67,10 @@ public class TelloFlix {
     private final ObservableValue<Frame> currentFrame = new ObservableValue<>(null);
 
     private FFmpegFrameGrabber grabber;
+    private FFmpegFrameRecorder recorder;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+
 
     /**
      * Verbindung zur Drohne (oder TelloCamp) aufbauen
@@ -132,13 +136,18 @@ public class TelloFlix {
         new Thread(() -> {
             String videoAddress = "udp://" + LOCAL_IP_ADDRESS + ":" + VIDEO_PORT;
             grabber = new FFmpegFrameGrabber(videoAddress);
-           // grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
+            recorder = new FFmpegFrameRecorder("/tmp/recorded.mpeg", VIDEO_WIDTH, VIDEO_HEIGHT, 0);
+            recorder.setFormat("mpeg");
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+
+            // grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
            // grabber.setFormat("h264");
            // grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
            // grabber.setImageWidth(VIDEO_WIDTH);
            // grabber.setImageHeight(VIDEO_HEIGHT);
             try {
                 grabber.start();
+                recorder.start();
             } catch (Exception e) {
                 LOGGER.severe("can't start FrameGrabber " + e.getMessage());
             }
@@ -395,7 +404,10 @@ public class TelloFlix {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
                 if (frame.image != null ) {
-                    currentFrame.setValue(frame.clone());
+
+                    Frame clone = frame.clone();
+                    currentFrame.setValue(clone);
+                    recorder.record(clone);
                 }
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
@@ -414,5 +426,19 @@ public class TelloFlix {
 
     public ObservableValue<Frame> currentFrameValue() {
         return currentFrame;
+    }
+
+    public void record() {
+        try {
+            recorder.stop();
+            recorder.release();
+
+            grabber.stop();
+            grabber.release();
+        } catch (FFmpegFrameRecorder.Exception | FFmpegFrameGrabber.Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 }
