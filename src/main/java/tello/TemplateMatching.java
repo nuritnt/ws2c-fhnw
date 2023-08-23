@@ -1,17 +1,18 @@
 package tello;
 
-import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.javacpp.DoublePointer;
-import org.bytedeco.javacv.CanvasFrame;
+import org.bytedeco.javacpp.indexer.FloatIndexer;
+import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.*;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.bytedeco.javacv.Java2DFrameUtils.toBufferedImage;
 import static org.bytedeco.opencv.global.opencv_core.*;
-import static org.bytedeco.opencv.global.opencv_highgui.*;
+import static org.bytedeco.opencv.global.opencv_highgui.cvShowImage;
+import static org.bytedeco.opencv.global.opencv_highgui.cvWaitKey;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 
@@ -33,49 +34,71 @@ public class TemplateMatching {
     }
 
 
-
-    public static void newStyle(String[] args){
-        //read in image default colors
-        Mat sourceColor = imread(args[0]);
-        Mat sourceGrey = new Mat(sourceColor.size(), CV_8UC1);
-        cvtColor(sourceColor, sourceGrey, COLOR_BGR2GRAY);
-        //load in template in grey
-        Mat template = imread(args[1],IMREAD_GRAYSCALE);//int = 0
-        //Size for the result image
-        Size size = new Size(sourceGrey.cols()-template.cols()+1, sourceGrey.rows()-template.rows()+1);
-        Mat result = new Mat(size, CV_32FC1);
-        matchTemplate(sourceGrey, template, result, TM_CCORR_NORMED);
-
-        DoublePointer minVal= new DoublePointer();
-        DoublePointer maxVal= new DoublePointer();
-        Point min = new Point();
-        Point max = new Point();
-        minMaxLoc(result, minVal, maxVal, min, max, null);
-        rectangle(sourceColor,new Rect(max.x(),max.y(),template.cols(),template.rows()), randColor(), 2, 0, 0);
-
-        // Display the "Original marked" image using CanvasFrame
-        CanvasFrame sourceFrame = new CanvasFrame("Original marked");
-        sourceFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        sourceFrame.showImage(toBufferedImage(sourceColor));
-
-        // Display the "Template" image using CanvasFrame
-        CanvasFrame templateFrame = new CanvasFrame("Template");
-        templateFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        templateFrame.showImage(toBufferedImage(template));
-
-        // Display the "Results matrix" image using CanvasFrame
-        CanvasFrame resultFrame = new CanvasFrame("Results matrix");
-        resultFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        resultFrame.showImage(toBufferedImage(result));
-
-        // Wait for user interaction
-        try {
-            sourceFrame.waitKey(0);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+    public static void newStyle(String[] args) throws Exception {
+        // Load the template images as grayscale
+        List<Mat> templates = new ArrayList<>();
+        for (int i = 1; i < args.length; i++) {
+            templates.add(imread(args[i], IMREAD_GRAYSCALE));
         }
 
+        // Open the webcam
+        OpenCVFrameGrabber grabber = new OpenCVFrameGrabber(0); // 0 represents the default camera
+        grabber.start();
+
+        CanvasFrame sourceFrame = new CanvasFrame("Template Matching"); // Create a window for displaying results
+        sourceFrame.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+
+        // Initialize the converter
+        OpenCVFrameConverter.ToMat matConverter = new OpenCVFrameConverter.ToMat();
+
+        // Loop to continuously capture frames and perform template matching
+        while (sourceFrame.isVisible()) {
+            Frame webcamFrame = grabber.grab(); // Capture a frame from the webcam
+            if (webcamFrame == null) {
+                break;
+            }
+
+            // Convert the grabbed Frame to Mat format
+            Mat sourceColor = convertFrameToMat(webcamFrame);
+
+            // Convert sourceColor to grayscale
+            Mat sourceGrey = new Mat();
+            cvtColor(sourceColor, sourceGrey, COLOR_BGR2GRAY);
+
+            // Loop through each template and perform template matching
+            for (Mat template : templates) {
+                Mat result = new Mat();
+                matchTemplate(sourceGrey, template, result, TM_CCOEFF_NORMED);
+
+                // Find the best match location
+                DoublePointer minVal = new DoublePointer();
+                DoublePointer maxVal = new DoublePointer();
+                Point min = new Point();
+                Point max = new Point();
+                minMaxLoc(result, minVal, maxVal, min, max, null);
+
+                // Draw a rectangle around the matched area
+                rectangle(sourceColor, new Rect(max.x(), max.y(), template.cols(), template.rows()), Scalar.RED, 2, 0, 0);
+            }
+
+            // Display the processed frame with the rectangles
+            sourceFrame.showImage(matConverter.convert(sourceColor));
+        }
+
+        // Release resources
+        grabber.stop();
+        sourceFrame.dispose();
     }
+
+
+    // Convert Frame to Mat
+    public static Mat convertFrameToMat(Frame frame) {
+        Java2DFrameConverter converter = new Java2DFrameConverter();
+        BufferedImage bufferedImage = converter.getBufferedImage(frame);
+        OpenCVFrameConverter.ToMat matConverter = new OpenCVFrameConverter.ToMat();
+        return matConverter.convertToMat(converter.convert(bufferedImage));
+    }
+
 
     // some usefull things.
     public static Scalar randColor(){
