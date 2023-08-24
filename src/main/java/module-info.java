@@ -8,6 +8,7 @@ module tello {
     requires org.bytedeco.ffmpeg.windows.x86_64;
     requires org.bytedeco.javacv;
     requires org.bytedeco.opencv;
+    requires java.desktop;
 
     exports tello;
     exports telloflix;
