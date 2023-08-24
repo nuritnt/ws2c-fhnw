@@ -3,10 +3,12 @@ package telloflix.views;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -37,9 +39,14 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button flipRightButton;
     private Button flipForwardButton;
     private Button flipBackwardButton;
-    public Button recordButton;
 
+    private Button rcForward;
+    private Button rcBackward;
+
+    public Button recordButton;
     private Canvas frameCanvas;
+
+    private Slider forward_backward_slider;
 
     private final JavaFXFrameConverter frameConverter = new JavaFXFrameConverter();
 
@@ -81,6 +88,9 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         recordButton = new Button("Record");
 
         frameCanvas = new Canvas(320, 240);
+
+        forward_backward_slider = new Slider(-100, 100, 0);
+        forward_backward_slider.setOrientation(Orientation.VERTICAL);
     }
 
     @Override
@@ -110,6 +120,8 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         add(flipForwardButton, 6, 4);
         add(flipBackwardButton, 7, 4);
         add(recordButton, 0, 0);
+
+        add(forward_backward_slider, 9, 0, 1, 5);
     }
 
     @Override
@@ -142,7 +154,6 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
             }
             //event.consume(); // Consume the event to prevent further propagation
         });
-
     }
 
     @Override
@@ -163,7 +174,9 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
                         ctx.drawImage(image, 0, 0, frameCanvas.getWidth(), frameCanvas.getHeight());
                     }
                 })));
-
+        forward_backward_slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            tello.rcFrwd(newValue.intValue());
+        });
 
 
 
