@@ -40,13 +40,17 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button flipForwardButton;
     private Button flipBackwardButton;
 
-    private Button rcForward;
-    private Button rcBackward;
 
     public Button recordButton;
     private Canvas frameCanvas;
 
     private Slider forward_backward_slider;
+
+    private Slider left_right_slider;
+    private Slider up_down_slider;
+    private Slider yaw_slider;
+
+    private Button resetSlidersButton;
 
     private final JavaFXFrameConverter frameConverter = new JavaFXFrameConverter();
 
@@ -86,11 +90,21 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flipForwardButton = new Button("Flip Forward");
         flipBackwardButton = new Button("Flip Backward");
         recordButton = new Button("Record");
+        resetSlidersButton = new Button("Reset Sliders");
 
         frameCanvas = new Canvas(320, 240);
 
         forward_backward_slider = new Slider(-100, 100, 0);
         forward_backward_slider.setOrientation(Orientation.VERTICAL);
+
+        left_right_slider = new Slider(-100, 100, 0);
+        left_right_slider.setOrientation(Orientation.HORIZONTAL);
+
+        up_down_slider = new Slider(-100, 100, 0);
+        up_down_slider.setOrientation(Orientation.VERTICAL);
+
+        yaw_slider = new Slider(-100, 100, 0);
+        yaw_slider.setOrientation(Orientation.HORIZONTAL);
     }
 
     @Override
@@ -99,29 +113,39 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         setVgap(20);
         setValignment(emergencyButton, VPos.TOP);
         setPadding(new Insets(50));
+        add(recordButton, 0, 0);
+
         add(startButton    , 2, 0);
-        add(flyUpButton    , 0, 1,2,1);
         add(landButton     , 3, 0);
         add(emergencyButton, 4, 0);
-
-        add(frameCanvas,     2, 1, 4, 4);
-
         add(batteryLabel, 5, 0);
+
+        add(flyUpButton    , 0, 1,2,1);
         add(yawLeftButton, 0,2);
         add(yawRightButton,1,2);
         add(flyDownButton,0,3,2,1);
-        add(flyForwardButton,6,1,2,1);
-        add(flyBackwardButton,6,3,2,1);
-        add(flyLeftButton,6,2);
-        add(flyRightButton,7,2);
 
-        add(flipLeftButton, 0, 4);
-        add(flipRightButton, 1, 4);
-        add(flipForwardButton, 6, 4);
-        add(flipBackwardButton, 7, 4);
-        add(recordButton, 0, 0);
 
-        add(forward_backward_slider, 9, 0, 1, 5);
+        add(frameCanvas,     2, 1, 4, 4);
+
+        add(flyForwardButton, 6, 1, 2, 1);
+        add(flyBackwardButton, 6, 2, 2, 1);
+        add(flyLeftButton, 6, 3);
+        add(flyRightButton, 6, 4);
+
+        add(flipLeftButton, 8, 1, 2, 1);
+        add(flipRightButton, 8, 2, 2, 1);
+        add(flipForwardButton, 8, 3, 2, 1);
+        add(flipBackwardButton, 8, 4, 2, 1);
+
+        add(resetSlidersButton, 0, 4, 2, 1);
+
+
+        add(forward_backward_slider, 9, 0, 1, 6);
+        add(left_right_slider, 0, 5, 10, 1);
+        add(up_down_slider, 10, 0, 1, 6);
+        add(yaw_slider, 0, 6, 10, 1);
+
     }
 
     @Override
@@ -154,6 +178,12 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
             }
             //event.consume(); // Consume the event to prevent further propagation
         });
+        resetSlidersButton.setOnAction(event -> {
+            forward_backward_slider.setValue(0);
+            left_right_slider.setValue(0);
+            up_down_slider.setValue(0);
+            yaw_slider.setValue(0);
+        });
     }
 
     @Override
@@ -176,6 +206,17 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
                 })));
         forward_backward_slider.valueProperty().addListener((observable, oldValue, newValue) -> {
             tello.rcFrwd(newValue.intValue());
+        });
+        left_right_slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            tello.rcLeftRight(newValue.intValue());
+        });
+
+        up_down_slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            tello.rcUpDown(newValue.intValue());
+        });
+
+        yaw_slider.valueProperty().addListener((observable, oldValue, newValue) -> {
+            tello.rcYaw(newValue.intValue());
         });
 
 

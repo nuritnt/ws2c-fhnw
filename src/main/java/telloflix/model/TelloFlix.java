@@ -41,7 +41,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "10.207.23.27";
+    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -78,6 +78,10 @@ public class TelloFlix {
     public ObservableValue<String> batteryLevel = new ObservableValue<>("bat: 0%");
     private int fwd_bk;
     private int left_right;
+
+    private int up_down;
+
+    private int yaw;
 
 
     /**
@@ -485,11 +489,21 @@ public class TelloFlix {
 
     public void rcFrwd(int newValue) {
         fwd_bk = newValue;
-        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " 0 0");
+        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " " +  up_down + " " + yaw);
     }
 
     public void rcLeftRight(int newValue) {
         left_right = newValue;
-        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " 0 0");
+        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " " +  up_down + " " + yaw);
+    }
+
+    public void rcUpDown(int newValue) {
+        up_down = newValue;
+        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " " + up_down + " " + yaw);
+    }
+
+    public void rcYaw(int newValue) {
+        yaw = newValue;
+        sendFireAndForgetCommand("rc " + left_right + " " + fwd_bk + " " + up_down + " " + yaw);
     }
 }
