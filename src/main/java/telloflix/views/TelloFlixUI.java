@@ -89,10 +89,10 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         setVgap(20);
         setValignment(emergencyButton, VPos.TOP);
         setPadding(new Insets(50));
-        add(startButton    , 0, 1);
-        add(flyUpButton    , 0, 2);
-        add(landButton     , 0, 3);
-        add(emergencyButton, 0, 4);
+        add(startButton    , 2, 0);
+        add(flyUpButton    , 0, 1,2,1);
+        add(landButton     , 3, 0);
+        add(emergencyButton, 4, 0);
 
         add(frameCanvas,     2, 1, 4, 4);
 

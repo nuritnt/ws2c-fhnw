@@ -41,7 +41,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "192.168.10.1";
+    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -73,13 +73,7 @@ public class TelloFlix {
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    LocalDateTime now = LocalDateTime.now();
 
-    // Define the desired date-time format
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
-
-    // Format the date and time using the defined format
-    String formattedDateTime = now.format(formatter);
 
     public ObservableValue<String> batteryLevel = new ObservableValue<>("bat: 0%");
 
@@ -154,9 +148,9 @@ public class TelloFlix {
             grabber.setImageWidth(VIDEO_WIDTH);
             grabber.setImageHeight(VIDEO_HEIGHT);
 
-            recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
-            recorder.setFormat("mp4");
-            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+            //recorder = new FFmpegFrameRecorder("recorded_" + timeNow +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+            //recorder.setFormat("mp4");
+            //recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 
             try {
                 grabber.start();
@@ -469,6 +463,11 @@ public class TelloFlix {
     }
 
     public void startRecorder(){
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+        String formattedDateTime = now.format(formatter);
+
         recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
         recorder.setFormat("mp4");
         recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
