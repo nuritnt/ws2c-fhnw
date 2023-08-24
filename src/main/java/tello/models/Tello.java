@@ -1,5 +1,7 @@
 package tello.models;
 
+import javafx.beans.property.SimpleStringProperty;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -51,6 +53,8 @@ public class Tello {
     private DatagramSocket statusSocket;
 
     private boolean connected = false;
+
+    public SimpleStringProperty batteryLevel;
 
     /**
      * Verbindung zur Drohne (oder TelloCamp) aufbauen
@@ -333,6 +337,15 @@ public class Tello {
                 statusSocket.receive(receivePacket);
                 String received = trimResponse(receivePacket);
                 // todo: hier den empfangenen String so weiterverarbeiten, dass die Informationen anschliessend z.B. im UI angezeigt werden koennen
+                Arrays.stream(received.split(";")).anyMatch(s -> {
+                    if (s.startsWith("bat")) {
+                        batteryLevel = new SimpleStringProperty(s.substring(4));
+                        return true;
+                    }
+                    return false;
+                });
+
+
                 LOGGER.info("state : " + received);
             } catch (Exception e) {
                 LOGGER.severe("can't receive state " + e.getLocalizedMessage());

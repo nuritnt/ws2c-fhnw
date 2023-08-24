@@ -1,6 +1,7 @@
 package telloflix.views;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -22,7 +23,8 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button landButton;
     private Button flyUpButton;
     private Button emergencyButton;
-    private Text batteryLevel;
+    private Text batteryLabel;
+    private SimpleStringProperty batteryLevel = new SimpleStringProperty("0");
     private Button yawLeftButton;
     private Button yawRightButton;
 
@@ -64,7 +66,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         landButton      = new Button("Land");
         flyUpButton     = new Button("Up");
         emergencyButton = new Button("Panic !");
-        batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
+        batteryLabel = new Text("Batterylevel: " + batteryLabel);
         yawLeftButton = new Button("Yaw Left");
         yawRightButton = new Button("Yaw Right");
         flyDownButton = new Button("Down");
@@ -94,7 +96,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
 
         add(frameCanvas,     2, 1, 4, 4);
 
-        add(batteryLevel, 5, 0);
+        add(batteryLabel, 5, 0);
         add(yawLeftButton, 0,2);
         add(yawRightButton,1,2);
         add(flyDownButton,0,3,2,1);
@@ -164,5 +166,16 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
 
 
 
+
+
+    }
+
+    @Override
+    public void setupBindings() {
+        ViewMixin.super.setupBindings();
+        batteryLabel.textProperty().bind(batteryLevel);
+        tello.batteryLevel.onChange((oldValue, newValue) -> {
+            batteryLevel.setValue(newValue.toString());
+        });
     }
 }

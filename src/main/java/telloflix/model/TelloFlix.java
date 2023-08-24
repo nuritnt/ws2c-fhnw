@@ -1,5 +1,7 @@
 package telloflix.model;
 
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.SimpleStringProperty;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
@@ -39,7 +41,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
+    public static final String TELLO_IP_ADDRESS = "192.168.10.1";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -78,6 +80,8 @@ public class TelloFlix {
 
     // Format the date and time using the defined format
     String formattedDateTime = now.format(formatter);
+
+    public ObservableValue<String> batteryLevel = new ObservableValue<>("bat: 0%");
 
 
     /**
@@ -401,7 +405,15 @@ public class TelloFlix {
                 statusSocket.receive(receivePacket);
                 String received = trimResponse(receivePacket);
                 // todo: hier den empfangenen String so weiterverarbeiten, dass die Informationen anschliessend z.B. im UI angezeigt werden koennen
-                LOGGER.info("state : " + received);
+                Arrays.stream(received.split(";")).anyMatch(s -> {
+                    if (s.startsWith("bat")) {
+                        batteryLevel.setValue("bat: "+ s.substring(4) + "%");
+                        return true;
+                    }
+                    return false;
+                });
+
+                //LOGGER.info("state : " + received);
             } catch (Exception e) {
                 LOGGER.severe("can't receive state " + e.getLocalizedMessage());
             }

@@ -12,7 +12,7 @@ import static telloflix.model.TelloFlix.REAL_TELLO_IP_ADDRESS;
 
 public class PacketRecorder {
 
-    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd__hhmmSSS");
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd__hhmm");
 
     private static final int RECORD_LENGTH = 5000;
 
@@ -23,7 +23,7 @@ public class PacketRecorder {
         String inputFile = "udp://" + REAL_TELLO_IP_ADDRESS + ":" + VIDEO_PORT;
 
         // Decodes-encodes
-        String outputFile = "/tmp/" + DATE_FORMAT.format(new Date()) + "_frameRecord.mp4";
+        String outputFile = "/tmp/" + DATE_FORMAT.format(new Date()) + "_frameRecord.mp4" +DATE_FORMAT;
         PacketRecorder.frameRecord(inputFile, outputFile);
 
         // copies codec (no need to re-encode)
