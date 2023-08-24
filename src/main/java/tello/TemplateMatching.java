@@ -30,7 +30,6 @@ public class TemplateMatching {
 
         newStyle(args);
         //oldStyle(args);
-
     }
 
 
