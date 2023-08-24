@@ -1,25 +1,24 @@
 package telloflix.model;
 
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.*;
+import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.bytedeco.javacv.Frame;
+import org.bytedeco.javacv.FrameGrabber;
 import tello.models.util.ObservableValue;
-import telloflix.PacketRecorder;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
-
-import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_H264;
-import static org.bytedeco.ffmpeg.global.avcodec.AV_CODEC_ID_MPEG1VIDEO;
 
 
 /**
@@ -40,7 +39,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "10.223.4.50";
+    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -54,8 +53,8 @@ public class TelloFlix {
     private static final int STATE_PORT = 8890;
     public static final int VIDEO_PORT = 11111;
 
-    public static final int VIDEO_WIDTH  = 960;
-    public static final int VIDEO_HEIGHT = 720;
+    public static final int VIDEO_WIDTH  = 1280;
+    public static final int VIDEO_HEIGHT = 960;
 
     public InetAddress    telloAddress = null;
     private DatagramSocket commandSocket;
@@ -68,9 +67,17 @@ public class TelloFlix {
 
     private FFmpegFrameGrabber grabber;
     private FFmpegFrameRecorder recorder;
-    private boolean videoStreamOn = false;
+    public boolean videoStreamOn = false;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    // Define the desired date-time format
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
+
+    // Format the date and time using the defined format
+    String formattedDateTime = now.format(formatter);
 
 
     /**
@@ -143,7 +150,7 @@ public class TelloFlix {
             grabber.setImageWidth(VIDEO_WIDTH);
             grabber.setImageHeight(VIDEO_HEIGHT);
 
-            recorder = new FFmpegFrameRecorder("recorded.mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+            recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
             recorder.setFormat("mp4");
             recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 
@@ -154,7 +161,6 @@ public class TelloFlix {
                 LOGGER.severe("can't start FrameGrabber " + e.getMessage());
             }
 
-            videoStreamOn = true;
             Thread videoThread = new Thread(this::listenToVideo);
             videoThread.setDaemon(true);
             videoThread.start();
@@ -180,21 +186,21 @@ public class TelloFlix {
     /**
      * Auto landing.
      *
-     * @return true if successful, otherwise false
      */
-    public boolean land() {
-        return sendCommandAndWait("land");
+    public void land() {
+        sendCommandAsync("land");
     }
 
     /**
      * Fly up.
      *
      * @param z distance in cm
-     * @return true if successful, otherwise false
      */
-    public boolean up(int z) {
-        return sendCommandAndWait("up " + z);
+    public void up(int z) {
+        sendCommandAsync("up " + z);
     }
+
+
 
     /**
      * Set speed to “x” cm/s. x = 10-100
@@ -403,7 +409,7 @@ public class TelloFlix {
     }
 
     private void listenToVideo() {
-        while (connected && videoStreamOn) {
+        while (connected) {
             try {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
@@ -411,11 +417,19 @@ public class TelloFlix {
 
                     Frame clone = frame.clone();
                     currentFrame.setValue(clone);
-                    recorder.record(clone);
+                    if(videoStreamOn){
+                        recorder.record(clone);
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
             }
+        }
+        try {
+            recorder.stop();
+            grabber.stop();
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -432,18 +446,28 @@ public class TelloFlix {
         return currentFrame;
     }
 
-    public void record() {
+    public void stopRecorder() {
+            try {
+                videoStreamOn = false;
+                recorder.stop();
+                recorder.release();
+            } catch (FFmpegFrameRecorder.Exception e) {
+                throw new RuntimeException(e);
+            }
+    }
+
+    public void startRecorder(){
+        recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+        recorder.setFormat("mp4");
+        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+
+        videoStreamOn = true;
+
+
         try {
-            videoStreamOn = false;
-            recorder.stop();
-            recorder.release();
-
-            grabber.stop();
-            grabber.release();
-        } catch (FFmpegFrameRecorder.Exception | FFmpegFrameGrabber.Exception e) {
-            throw new RuntimeException(e);
+             recorder.start();
+        } catch (Exception e) {
+            LOGGER.severe("can't start FrameGrabber " + e.getMessage());
         }
-
-
     }
 }

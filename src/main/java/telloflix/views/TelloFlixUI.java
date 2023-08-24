@@ -35,7 +35,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button flipRightButton;
     private Button flipForwardButton;
     private Button flipBackwardButton;
-    private Button recordButton;
+    public Button recordButton;
 
     private Canvas frameCanvas;
 
@@ -78,7 +78,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flipBackwardButton = new Button("Flip Backward");
         recordButton = new Button("Record");
 
-        frameCanvas = new Canvas(TelloFlix.VIDEO_WIDTH, TelloFlix.VIDEO_HEIGHT);
+        frameCanvas = new Canvas(320, 240);
     }
 
     @Override
@@ -127,7 +127,19 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flipRightButton.setOnAction(event -> tello.flip("r"));
         flipForwardButton.setOnAction(event-> tello.flip("f"));
         flipBackwardButton.setOnAction(event-> tello.flip("b"));
-        recordButton.setOnAction(event    -> tello.record());
+        recordButton.setOnAction(event -> {
+            if (tello.videoStreamOn) {
+                recordButton.setStyle("-fx-background-color: white");
+                recordButton.setText("Record");
+
+                tello.stopRecorder();
+            } else {
+                recordButton.setStyle("-fx-background-color: red");
+                recordButton.setText("Recording...");
+                tello.startRecorder();
+            }
+            //event.consume(); // Consume the event to prevent further propagation
+        });
 
     }
 
@@ -149,5 +161,8 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
                         ctx.drawImage(image, 0, 0, frameCanvas.getWidth(), frameCanvas.getHeight());
                     }
                 })));
+
+
+
     }
 }
