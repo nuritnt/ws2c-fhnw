@@ -37,7 +37,7 @@ public class TelloFlixStarter extends Application {
         //das PresentationModel, in diesem Fall die Klasse zur Verbindung mit der Drohne
         tello = new TelloFlix();
         tello.connect();
-       // tello.startStatusListener();
+        tello.startStateListener();
         tello.startVideoListener();
     }
 
@@ -50,6 +50,7 @@ public class TelloFlixStarter extends Application {
         primaryStage.setTitle("Let it fly");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
+
 
         primaryStage.show();
     }

@@ -69,17 +69,17 @@ public class TelloUI extends GridPane implements ViewMixin {
         setVgap(20);
         setPadding(new Insets(50));
         add(startButton, 0, 0);
-        add(flyUpButton, 0, 1);
-        add(landButton, 0, 2);
-        add(emergencyButton, 0, 3);
-        add(batteryLevel, 0, 4);
-        add(yawLeftButton, 1,0);
-        add(yawRightButton,1,1);
-        add(flyDownButton,1,2);
-        add(flyForwardButton,1,3);
-        add(flyBackwardButton,1,4);
-        add(flyLeftButton,1,5);
-        add(flyRightButton,1,6);
+        add(flyUpButton, 1, 1);
+        add(landButton, 1, 0);
+        add(emergencyButton, 2, 0);
+        add(batteryLevel, 5, 0);
+        add(yawLeftButton, 0,2);
+        add(yawRightButton,2,2);
+        add(flyDownButton,1,3);
+        add(flyForwardButton,4,1);
+        add(flyBackwardButton,4,3);
+        add(flyLeftButton,3,2);
+        add(flyRightButton,5,2);
 
     }
 

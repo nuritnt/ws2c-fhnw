@@ -1,6 +1,7 @@
 package telloflix.views;
 
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -22,7 +23,8 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button landButton;
     private Button flyUpButton;
     private Button emergencyButton;
-    private Text batteryLevel;
+    private Text batteryLabel;
+    private SimpleStringProperty batteryLevel = new SimpleStringProperty("0");
     private Button yawLeftButton;
     private Button yawRightButton;
 
@@ -35,6 +37,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Button flipRightButton;
     private Button flipForwardButton;
     private Button flipBackwardButton;
+    public Button recordButton;
 
     private Canvas frameCanvas;
 
@@ -63,7 +66,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         landButton      = new Button("Land");
         flyUpButton     = new Button("Up");
         emergencyButton = new Button("Panic !");
-        batteryLevel = new Text("Batterylevel: " + tello.getBatteryLevel());
+        batteryLabel = new Text("Batterylevel: " + batteryLabel);
         yawLeftButton = new Button("Yaw Left");
         yawRightButton = new Button("Yaw Right");
         flyDownButton = new Button("Down");
@@ -75,8 +78,9 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flipRightButton = new Button("Flip Right");
         flipForwardButton = new Button("Flip Forward");
         flipBackwardButton = new Button("Flip Backward");
+        recordButton = new Button("Record");
 
-        frameCanvas = new Canvas(TelloFlix.VIDEO_WIDTH, TelloFlix.VIDEO_HEIGHT);
+        frameCanvas = new Canvas(320, 240);
     }
 
     @Override
@@ -85,14 +89,14 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         setVgap(20);
         setValignment(emergencyButton, VPos.TOP);
         setPadding(new Insets(50));
-        add(startButton    , 0, 0);
-        add(flyUpButton    , 0, 1);
-        add(landButton     , 0, 2);
-        add(emergencyButton, 0, 3);
+        add(startButton    , 0, 1);
+        add(flyUpButton    , 0, 2);
+        add(landButton     , 0, 3);
+        add(emergencyButton, 0, 4);
 
         add(frameCanvas,     2, 1, 4, 4);
 
-        add(batteryLevel, 5, 0);
+        add(batteryLabel, 5, 0);
         add(yawLeftButton, 0,2);
         add(yawRightButton,1,2);
         add(flyDownButton,0,3,2,1);
@@ -105,6 +109,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         add(flipRightButton, 1, 4);
         add(flipForwardButton, 6, 4);
         add(flipBackwardButton, 7, 4);
+        add(recordButton, 0, 0);
     }
 
     @Override
@@ -124,6 +129,19 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         flipRightButton.setOnAction(event -> tello.flip("r"));
         flipForwardButton.setOnAction(event-> tello.flip("f"));
         flipBackwardButton.setOnAction(event-> tello.flip("b"));
+        recordButton.setOnAction(event -> {
+            if (tello.videoStreamOn) {
+                recordButton.setStyle("-fx-background-color: white");
+                recordButton.setText("Record");
+
+                tello.stopRecorder();
+            } else {
+                recordButton.setStyle("-fx-background-color: red");
+                recordButton.setText("Recording...");
+                tello.startRecorder();
+            }
+            //event.consume(); // Consume the event to prevent further propagation
+        });
 
     }
 
@@ -145,5 +163,19 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
                         ctx.drawImage(image, 0, 0, frameCanvas.getWidth(), frameCanvas.getHeight());
                     }
                 })));
+
+
+
+
+
+    }
+
+    @Override
+    public void setupBindings() {
+        ViewMixin.super.setupBindings();
+        batteryLabel.textProperty().bind(batteryLevel);
+        tello.batteryLevel.onChange((oldValue, newValue) -> {
+            batteryLevel.setValue(newValue.toString());
+        });
     }
 }

@@ -1,19 +1,22 @@
 package telloflix.model;
 
+import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.SimpleStringProperty;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
+import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import tello.models.util.ObservableValue;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,10 +38,10 @@ public class TelloFlix {
     private static final Logger LOGGER = Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
 
     // das ist die IP-Adresse der "echten" Drohne (Hinweis: Ihr Laptop muss mit dem WLAN der Drohne verbunden sein)
-    private static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
+    public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    private static final String TELLO_IP_ADDRESS = "192.168.10.1";
+    public static final String TELLO_IP_ADDRESS = "192.168.10.1";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -50,12 +53,12 @@ public class TelloFlix {
     // die Ports über die Status-Meldungen und Video-Bilder ankommen
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
     private static final int STATE_PORT = 8890;
-    private static final int VIDEO_PORT = 11111;
+    public static final int VIDEO_PORT = 11111;
 
-    public static final int VIDEO_WIDTH  = 320;
-    public static final int VIDEO_HEIGHT = 240;
+    public static final int VIDEO_WIDTH  = 1280;
+    public static final int VIDEO_HEIGHT = 960;
 
-    private InetAddress    telloAddress = null;
+    public InetAddress    telloAddress = null;
     private DatagramSocket commandSocket;
 
     private DatagramSocket statusSocket;
@@ -65,8 +68,21 @@ public class TelloFlix {
     private final ObservableValue<Frame> currentFrame = new ObservableValue<>(null);
 
     private FFmpegFrameGrabber grabber;
+    private FFmpegFrameRecorder recorder;
+    public boolean videoStreamOn = false;
 
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    // Define the desired date-time format
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmm");
+
+    // Format the date and time using the defined format
+    String formattedDateTime = now.format(formatter);
+
+    public ObservableValue<String> batteryLevel = new ObservableValue<>("bat: 0%");
+
 
     /**
      * Verbindung zur Drohne (oder TelloCamp) aufbauen
@@ -132,16 +148,23 @@ public class TelloFlix {
         new Thread(() -> {
             String videoAddress = "udp://" + LOCAL_IP_ADDRESS + ":" + VIDEO_PORT;
             grabber = new FFmpegFrameGrabber(videoAddress);
-           // grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
-           // grabber.setFormat("h264");
-           // grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
-           // grabber.setImageWidth(VIDEO_WIDTH);
-           // grabber.setImageHeight(VIDEO_HEIGHT);
+            grabber.setImageMode(FrameGrabber.ImageMode.COLOR);
+            grabber.setFormat("h264");
+            grabber.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+            grabber.setImageWidth(VIDEO_WIDTH);
+            grabber.setImageHeight(VIDEO_HEIGHT);
+
+            recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+            recorder.setFormat("mp4");
+            recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+
             try {
                 grabber.start();
+                recorder.start();
             } catch (Exception e) {
                 LOGGER.severe("can't start FrameGrabber " + e.getMessage());
             }
+
             Thread videoThread = new Thread(this::listenToVideo);
             videoThread.setDaemon(true);
             videoThread.start();
@@ -167,21 +190,21 @@ public class TelloFlix {
     /**
      * Auto landing.
      *
-     * @return true if successful, otherwise false
      */
-    public boolean land() {
-        return sendCommandAndWait("land");
+    public void land() {
+        sendCommandAsync("land");
     }
 
     /**
      * Fly up.
      *
      * @param z distance in cm
-     * @return true if successful, otherwise false
      */
-    public boolean up(int z) {
-        return sendCommandAndWait("up " + z);
+    public void up(int z) {
+        sendCommandAsync("up " + z);
     }
+
+
 
     /**
      * Set speed to “x” cm/s. x = 10-100
@@ -382,7 +405,15 @@ public class TelloFlix {
                 statusSocket.receive(receivePacket);
                 String received = trimResponse(receivePacket);
                 // todo: hier den empfangenen String so weiterverarbeiten, dass die Informationen anschliessend z.B. im UI angezeigt werden koennen
-                LOGGER.info("state : " + received);
+                Arrays.stream(received.split(";")).anyMatch(s -> {
+                    if (s.startsWith("bat")) {
+                        batteryLevel.setValue("bat: "+ s.substring(4) + "%");
+                        return true;
+                    }
+                    return false;
+                });
+
+                //LOGGER.info("state : " + received);
             } catch (Exception e) {
                 LOGGER.severe("can't receive state " + e.getLocalizedMessage());
             }
@@ -395,11 +426,22 @@ public class TelloFlix {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
                 if (frame.image != null ) {
-                    currentFrame.setValue(frame.clone());
+
+                    Frame clone = frame.clone();
+                    currentFrame.setValue(clone);
+                    if(videoStreamOn){
+                        recorder.record(clone);
+                    }
                 }
             } catch (Exception e) {
                 LOGGER.severe(e.getMessage());
             }
+        }
+        try {
+            recorder.stop();
+            grabber.stop();
+        } catch (Exception e) {
+            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -414,5 +456,30 @@ public class TelloFlix {
 
     public ObservableValue<Frame> currentFrameValue() {
         return currentFrame;
+    }
+
+    public void stopRecorder() {
+            try {
+                videoStreamOn = false;
+                recorder.stop();
+                recorder.release();
+            } catch (FFmpegFrameRecorder.Exception e) {
+                throw new RuntimeException(e);
+            }
+    }
+
+    public void startRecorder(){
+        recorder = new FFmpegFrameRecorder("recorded_" + formattedDateTime +".mp4", grabber.getImageWidth(), grabber.getImageHeight(), 0);
+        recorder.setFormat("mp4");
+        recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
+
+        videoStreamOn = true;
+
+
+        try {
+             recorder.start();
+        } catch (Exception e) {
+            LOGGER.severe("can't start FrameGrabber " + e.getMessage());
+        }
     }
 }
