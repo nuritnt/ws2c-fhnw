@@ -81,7 +81,7 @@ public class DeepLearningFaceDetection {
                 float ty = f2 * 300;//top left point's y
                 float bx = f3 * 300;//bottom right point's x
                 float by = f4 * 300;//bottom right point's y
-                rectangle(image, new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by)), new Scalar(255, 0, 0, 0));//print blue rectangle
+                rectangle(image, new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by)), new Scalar(0 , 255, 0, 0), 3, 0, 0);//print green rectangle
             }
         }
 
