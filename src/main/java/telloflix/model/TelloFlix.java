@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 import static tello.DeepLearningFaceDetection.detect;
+import static tello.DeepLearningFaceDetection.draw;
 
 
 /**
@@ -430,7 +431,8 @@ public class TelloFlix {
                         OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
                         Mat colorimg = converter.convert(clone);
 
-                        detect(colorimg);
+                        Mat detectedImage = detect(colorimg);
+                        draw(colorimg, detectedImage);
                         currentFrame.setValue(converter.convert(colorimg));
                         counter = 0;
                     }
