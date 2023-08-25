@@ -47,8 +47,15 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
     private Slider forward_backward_slider;
 
     private Slider left_right_slider;
+    private Text leftLabel;
+    private Text rightLabel;
     private Slider up_down_slider;
+    private Text upLabel;
+    private Text downLabel;
     private Slider yaw_slider;
+    private Text yawLabel;
+    private Text forwardLabel;
+    private Text backwardLabel;
 
     private Button resetSlidersButton;
 
@@ -92,7 +99,7 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         recordButton = new Button("Record");
         resetSlidersButton = new Button("Reset Sliders");
 
-        frameCanvas = new Canvas(320, 240);
+        frameCanvas = new Canvas(480, 360);
 
         forward_backward_slider = new Slider(-100, 100, 0);
         forward_backward_slider.setOrientation(Orientation.VERTICAL);
@@ -105,6 +112,15 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
 
         yaw_slider = new Slider(-100, 100, 0);
         yaw_slider.setOrientation(Orientation.HORIZONTAL);
+
+        leftLabel = new Text("Left");
+        rightLabel = new Text("Right");
+        upLabel = new Text("Up");
+        downLabel = new Text("Down");
+        yawLabel = new Text("Yaw");
+        forwardLabel = new Text("Forward");
+        backwardLabel = new Text("Backward");
+
     }
 
     @Override
@@ -113,38 +129,47 @@ public class TelloFlixUI extends GridPane implements ViewMixin {
         setVgap(20);
         setValignment(emergencyButton, VPos.TOP);
         setPadding(new Insets(50));
-        add(recordButton, 0, 0);
+        add(recordButton, 1, 0,2,1);
 
-        add(startButton    , 2, 0);
-        add(landButton     , 3, 0);
-        add(emergencyButton, 4, 0);
-        add(batteryLabel, 5, 0);
+        add(startButton    , 3, 0);
+        add(landButton     , 4, 0);
+        add(emergencyButton, 5, 0);
+        add(batteryLabel, 6, 0);
 
-        add(flyUpButton    , 0, 1,2,1);
-        add(yawLeftButton, 0,2);
-        add(yawRightButton,1,2);
-        add(flyDownButton,0,3,2,1);
-
-
-        add(frameCanvas,     2, 1, 4, 4);
-
-        add(flyForwardButton, 6, 1, 2, 1);
-        add(flyBackwardButton, 6, 2, 2, 1);
-        add(flyLeftButton, 6, 3);
-        add(flyRightButton, 6, 4);
-
-        add(flipLeftButton, 8, 1, 2, 1);
-        add(flipRightButton, 8, 2, 2, 1);
-        add(flipForwardButton, 8, 3, 2, 1);
-        add(flipBackwardButton, 8, 4, 2, 1);
-
-        add(resetSlidersButton, 0, 4, 2, 1);
+        add(flyUpButton    , 1, 1,2,1);
+        add(yawLeftButton, 1,2);
+        add(yawRightButton,2,2);
+        add(flyDownButton,1,3,2,1);
 
 
-        add(forward_backward_slider, 9, 0, 1, 6);
-        add(left_right_slider, 0, 5, 10, 1);
-        add(up_down_slider, 10, 0, 1, 6);
-        add(yaw_slider, 0, 6, 10, 1);
+        add(frameCanvas,     3, 1, 4, 3);
+
+        add(flyForwardButton, 7, 1, 2, 1);
+        add(flyBackwardButton, 7, 3, 2, 1);
+        add(flyLeftButton, 7, 2);
+        add(flyRightButton, 8, 2);
+
+        add(flipLeftButton, 3, 4);
+        add(flipRightButton, 6, 4);
+        add(flipForwardButton, 4, 4);
+        add(flipBackwardButton, 5, 4);
+
+        add(resetSlidersButton, 4, 5);
+
+
+        add(forward_backward_slider, 9, 1, 1, 3);
+        add(left_right_slider, 6, 5, 2, 1);
+        add(up_down_slider, 0, 1, 1, 3);
+        add(yaw_slider, 2, 5, 2, 1);
+
+        add(leftLabel, 5,5);
+        add(rightLabel, 8,5);
+        add(upLabel, 0,0);
+        add(downLabel, 0,4);
+        add(yawLabel, 1,5);
+        add(forwardLabel, 9,0);
+        add(backwardLabel, 9,4);
+
 
     }
 
