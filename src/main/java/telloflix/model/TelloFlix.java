@@ -41,7 +41,7 @@ public class TelloFlix {
     public static final String REAL_TELLO_IP_ADDRESS = "192.168.10.1";
 
     //todo: hier die in TelloCamp angezeigte IP-Adresse oder falls man mit der echten Drohne fliegen will 'REAL_TELLO_IP_ADDRESS' eintragen
-    public static final String TELLO_IP_ADDRESS = "10.207.14.123";
+    public static final String TELLO_IP_ADDRESS = "192.168.10.1";
 
     // ueber diesen Port werden die Kommandos verschickt
     //todo: überprüfen, ob das in TelloCamp auch so gesetzt ist
@@ -429,6 +429,8 @@ public class TelloFlix {
 
         List<Rect> lastDetectedRects = new ArrayList<>();
 
+        boolean hasDetectedOnce = false;
+
         while (connected) {
             try {
                 Frame frame = grabber.grabImage();
@@ -457,6 +459,10 @@ public class TelloFlix {
                    // currentFrame.setValue(clone);
                     if(videoStreamOn){
                         recorder.record(clone);
+                        if(lastDetectedRects.size() > 0 && !hasDetectedOnce){
+                            flip("f");
+                            hasDetectedOnce = true;
+                        }
                     }
                 }
             } catch (Exception e) {

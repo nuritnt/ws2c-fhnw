@@ -49,7 +49,7 @@ public class TelloFlixStarter extends Application {
 
         primaryStage.setTitle("Let it fly");
         primaryStage.setScene(scene);
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
 
 
         primaryStage.show();
