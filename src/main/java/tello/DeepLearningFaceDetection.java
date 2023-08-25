@@ -46,7 +46,7 @@ public class DeepLearningFaceDetection {
         net = readNetFromCaffe(PROTO_FILE, CAFFE_MODEL_FILE);
     }
 
-    private static void detectAndDraw(Mat image) {//detect faces and draw a blue rectangle around each face
+    public static void detectAndDraw(Mat image) {//detect faces and draw a blue rectangle around each face
 //resized to (300x300) to match network
         resize(image, image, new Size(300, 300));//resize the image to match the input size of the model
 

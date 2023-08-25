@@ -3,10 +3,8 @@ package telloflix.model;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.SimpleStringProperty;
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.*;
+import org.bytedeco.opencv.opencv_core.Mat;
 import tello.models.util.ObservableValue;
 
 import java.io.IOException;
@@ -21,6 +19,8 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
+
+import static tello.DeepLearningFaceDetection.detectAndDraw;
 
 
 /**
@@ -91,7 +91,7 @@ public class TelloFlix {
      */
     public boolean connect() {
         try {
-            telloAddress = InetAddress.getByName(TELLO_IP_ADDRESS);
+            telloAddress = InetAddress.getByName(REAL_TELLO_IP_ADDRESS);
 
             commandSocket = new DatagramSocket();
             commandSocket.connect(telloAddress, COMMAND_PORT);
@@ -420,14 +420,32 @@ public class TelloFlix {
     }
 
     private void listenToVideo() {
+        int counter = 0;
         while (connected) {
             try {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
-                if (frame.image != null ) {
 
+
+
+                if (frame.image != null ) {
                     Frame clone = frame.clone();
-                    currentFrame.setValue(clone);
+                    if(counter == 15){
+                        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+                        Mat colorimg = converter.convert(clone);
+
+                        detectAndDraw(colorimg);
+                        currentFrame.setValue(converter.convert(colorimg));
+                        counter = 0;
+                    }
+                    else {
+                        currentFrame.setValue(clone);
+                        counter++;
+                    }
+
+
+                   //
+                   // currentFrame.setValue(clone);
                     if(videoStreamOn){
                         recorder.record(clone);
                     }
