@@ -3,6 +3,7 @@ package telloflix.model;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Rect;
 import tello.models.util.ObservableValue;
 
 import java.io.IOException;
@@ -11,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -418,21 +421,29 @@ public class TelloFlix {
 
     private void listenToVideo() {
         int counter = 0;
+
+        int lastDetectedX = -1;
+        int lastDetectedY = -1;
+        int lastDetectedWidth = -1;
+        int lastDetectedHeight = -1;
+
+        List<Rect> lastDetectedRects = new ArrayList<>();
+
         while (connected) {
             try {
                 Frame frame = grabber.grabImage();
                 //hier frame verarbeiten
-
-
-
                 if (frame.image != null ) {
                     Frame clone = frame.clone();
                     if(counter == 15){
                         OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
                         Mat colorimg = converter.convert(clone);
 
-                        Mat detectedImage = detect(colorimg);
-                        draw(colorimg, detectedImage);
+                        lastDetectedRects = detect(colorimg);
+
+                        draw(colorimg, lastDetectedRects);
+
+
                         currentFrame.setValue(converter.convert(colorimg));
                         counter = 0;
                     }

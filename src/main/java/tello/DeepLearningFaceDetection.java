@@ -7,6 +7,10 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.*;
 import org.bytedeco.opencv.opencv_videoio.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_dnn.*;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
@@ -45,7 +49,7 @@ public class DeepLearningFaceDetection {
         net = readNetFromCaffe(PROTO_FILE, CAFFE_MODEL_FILE);
     }
 
-    public static Mat detect(Mat image) {//detect faces and draw a blue rectangle around each face
+    public static List<Rect> detect(Mat image) {//detect faces and draw a blue rectangle around each face
 //resized to (300x300) to match network
         resize(image, image, new Size(300, 300));//resize the image to match the input size of the model
 
@@ -57,14 +61,7 @@ public class DeepLearningFaceDetection {
         net.setInput(blob);//set the input to network model
         Mat output = net.forward();//feed forward the input to the network to get the output matrix
 
-        return output;
-
-
-        }
-
-
-    public static void draw (Mat image, Mat output){
-
+        List<Rect> allRects = new ArrayList<>();
 
         Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));//extract a 2d matrix for 4d output matrix with form of (number of detections x 7)
 
@@ -81,43 +78,53 @@ public class DeepLearningFaceDetection {
                 float ty = f2 * 300;//top left point's y
                 float bx = f3 * 300;//bottom right point's x
                 float by = f4 * 300;//bottom right point's y
-                rectangle(image, new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by)), new Scalar(0 , 255, 0, 0), 3, 0, 0);//print green rectangle
+                allRects.add(new Rect(new Point((int) tx, (int) ty),
+                                      new Point((int) bx, (int) by)));
             }
         }
 
-
-    }
-
-    public static void main(String[] args) {
-        VideoCapture capture = new VideoCapture();
-        capture.set(CAP_PROP_FRAME_WIDTH, 1280);
-        capture.set(CAP_PROP_FRAME_HEIGHT, 720);
-
-        if (!capture.open(0)) {
-            System.out.println("Can not open the file !!!");
+        return allRects;
         }
-        // stores every each frame from the camera
-        Mat colorimg = new Mat();
-        //display video feed and detected face
-        CanvasFrame mainframe = new CanvasFrame("Face Detection", CanvasFrame.getDefaultGamma() / 2.2);
-        mainframe.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
-        mainframe.setCanvasSize(600, 600);
-        mainframe.setLocationRelativeTo(null);
-        mainframe.setVisible(true);
 
-        while (true) {
-            while (capture.read(colorimg) && mainframe.isVisible()) {
-                Mat detectedImage = detect(colorimg);
-                draw(colorimg, detectedImage);
-                mainframe.showImage(converter.convert(colorimg));
-                try {
-                    Thread.sleep(50); //delay to control frame rate of video
-                } catch (InterruptedException ex) {
-                    System.out.println(ex.getMessage());
-                }
 
-            }
+    public static void draw (Mat image, List<Rect> allRects){
+        for(Rect r : allRects){
+            rectangle(image, r,
+                    new Scalar(0 , 255, 0, 0),
+                    3, 0, 0);//print green rectangle
         }
     }
+
+    //public static void main(String[] args) {
+    //    VideoCapture capture = new VideoCapture();
+    //    capture.set(CAP_PROP_FRAME_WIDTH, 1280);
+    //    capture.set(CAP_PROP_FRAME_HEIGHT, 720);
+//
+    //    if (!capture.open(0)) {
+    //        System.out.println("Can not open the file !!!");
+    //    }
+    //    // stores every each frame from the camera
+    //    Mat colorimg = new Mat();
+    //    //display video feed and detected face
+    //    CanvasFrame mainframe = new CanvasFrame("Face Detection", CanvasFrame.getDefaultGamma() / 2.2);
+    //    mainframe.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+    //    mainframe.setCanvasSize(600, 600);
+    //    mainframe.setLocationRelativeTo(null);
+    //    mainframe.setVisible(true);
+//
+    //    while (true) {
+    //        while (capture.read(colorimg) && mainframe.isVisible()) {
+    //            Mat detectedImage = detect(colorimg);
+    //            draw(colorimg, detectedImage);
+    //            mainframe.showImage(converter.convert(colorimg));
+    //            try {
+    //                Thread.sleep(50); //delay to control frame rate of video
+    //            } catch (InterruptedException ex) {
+    //                System.out.println(ex.getMessage());
+    //            }
+//
+    //        }
+    //    }
+    //}
 
 }
