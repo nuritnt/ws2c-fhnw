@@ -6,7 +6,6 @@ import org.bytedeco.javacv.OpenCVFrameConverter;
 
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.*;
-import org.bytedeco.opencv.opencv_imgproc.*;
 import org.bytedeco.opencv.opencv_videoio.*;
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_dnn.*;
@@ -46,7 +45,7 @@ public class DeepLearningFaceDetection {
         net = readNetFromCaffe(PROTO_FILE, CAFFE_MODEL_FILE);
     }
 
-    public static void detectAndDraw(Mat image) {//detect faces and draw a blue rectangle around each face
+    public static Mat detect(Mat image) {//detect faces and draw a blue rectangle around each face
 //resized to (300x300) to match network
         resize(image, image, new Size(300, 300));//resize the image to match the input size of the model
 
@@ -57,6 +56,15 @@ public class DeepLearningFaceDetection {
 
         net.setInput(blob);//set the input to network model
         Mat output = net.forward();//feed forward the input to the network to get the output matrix
+
+        return output;
+
+
+        }
+
+
+    public static void draw (Mat image, Mat output){
+
 
         Mat ne = new Mat(new Size(output.size(3), output.size(2)), CV_32F, output.ptr(0, 0));//extract a 2d matrix for 4d output matrix with form of (number of detections x 7)
 
@@ -76,6 +84,8 @@ public class DeepLearningFaceDetection {
                 rectangle(image, new Rect(new Point((int) tx, (int) ty), new Point((int) bx, (int) by)), new Scalar(255, 0, 0, 0));//print blue rectangle
             }
         }
+
+
     }
 
     public static void main(String[] args) {
@@ -97,7 +107,8 @@ public class DeepLearningFaceDetection {
 
         while (true) {
             while (capture.read(colorimg) && mainframe.isVisible()) {
-                detectAndDraw(colorimg);
+                Mat detectedImage = detect(colorimg);
+                draw(colorimg, detectedImage);
                 mainframe.showImage(converter.convert(colorimg));
                 try {
                     Thread.sleep(50); //delay to control frame rate of video

@@ -1,7 +1,5 @@
 package telloflix.model;
 
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.SimpleStringProperty;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -10,8 +8,6 @@ import tello.models.util.ObservableValue;
 import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +16,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-import static tello.DeepLearningFaceDetection.detectAndDraw;
+import static tello.DeepLearningFaceDetection.detect;
 
 
 /**
@@ -434,7 +430,7 @@ public class TelloFlix {
                         OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
                         Mat colorimg = converter.convert(clone);
 
-                        detectAndDraw(colorimg);
+                        detect(colorimg);
                         currentFrame.setValue(converter.convert(colorimg));
                         counter = 0;
                     }
