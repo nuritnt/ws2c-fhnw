@@ -117,5 +117,3 @@ welches gesucht wird "imageToFind". Es braucht keine "" '' und muss auch nicht m
 
 ![image](https://github.com/FHNW-WS2C/tello-playground-nuritnt/assets/11731325/2f2ed86b-4a47-425e-9082-db50e3ac1ec9)
 
-![image](https://github.com/FHNW-WS2C/tello-playground-nuritnt/assets/11731325/2f2ed86b-4a47-425e-9082-db50e3ac1ec9)
-
